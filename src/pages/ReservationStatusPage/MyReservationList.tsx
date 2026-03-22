@@ -1,9 +1,10 @@
-import { css } from '@emotion/react';
+import styled from '@emotion/styled';
 import { useMemo } from 'react';
 import { Spacing, Button, Text, ListRow } from '_tosslib/components';
 import { colors } from '_tosslib/constants/colors';
 import type { Room, Reservation } from 'pages/remotes';
 import { formatEquipmentLabels } from 'pages/utils';
+import { Section, SectionHeader, EmptyState, ListContainer } from 'pages/styles';
 
 interface MyReservationListProps {
   myReservations: Reservation[];
@@ -16,18 +17,8 @@ export function MyReservationList({ myReservations, rooms, onCancel }: MyReserva
   const getRoomName = (roomId: string) => roomNameMap.get(roomId) ?? roomId;
 
   return (
-    <div
-      css={css`
-        padding: 0 24px;
-      `}
-    >
-      <div
-        css={css`
-          display: flex;
-          align-items: baseline;
-          gap: 6px;
-        `}
-      >
+    <Section>
+      <SectionHeader>
         <Text typography="t5" fontWeight="bold" color={colors.grey900}>
           내 예약
         </Text>
@@ -36,40 +27,19 @@ export function MyReservationList({ myReservations, rooms, onCancel }: MyReserva
             {myReservations.length}건
           </Text>
         )}
-      </div>
+      </SectionHeader>
       <Spacing size={16} />
 
       {myReservations.length === 0 ? (
-        <div
-          css={css`
-            padding: 40px 0;
-            text-align: center;
-            background: ${colors.grey50};
-            border-radius: 14px;
-          `}
-        >
+        <EmptyState>
           <Text typography="t6" color={colors.grey500}>
             예약 내역이 없습니다.
           </Text>
-        </div>
+        </EmptyState>
       ) : (
-        <div
-          css={css`
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-          `}
-        >
+        <ListContainer>
           {myReservations.map(res => (
-            <div
-              key={res.id}
-              css={css`
-                padding: 14px 16px;
-                border-radius: 14px;
-                background: ${colors.grey50};
-                border: 1px solid ${colors.grey200};
-              `}
-            >
+            <ReservationCard key={res.id}>
               <ListRow
                 contents={
                   <ListRow.Text2Rows
@@ -97,10 +67,17 @@ export function MyReservationList({ myReservations, rooms, onCancel }: MyReserva
                   </Button>
                 }
               />
-            </div>
+            </ReservationCard>
           ))}
-        </div>
+        </ListContainer>
       )}
-    </div>
+    </Section>
   );
 }
+
+const ReservationCard = styled.div`
+  padding: 14px 16px;
+  border-radius: 14px;
+  background: ${colors.grey50};
+  border: 1px solid ${colors.grey200};
+`;

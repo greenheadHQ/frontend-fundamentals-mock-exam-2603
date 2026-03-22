@@ -1,9 +1,11 @@
 import { css } from '@emotion/react';
+import styled from '@emotion/styled';
 import { useEffect, useMemo, useState } from 'react';
 import { Spacing, Button, Text, ListRow } from '_tosslib/components';
 import { colors } from '_tosslib/constants/colors';
 import type { Room, Reservation } from 'pages/remotes';
 import { formatEquipmentLabels } from 'pages/utils';
+import { Section, SectionHeader, EmptyState, ListContainer } from 'pages/styles';
 
 function filterByCapacity(room: Room, attendees: number): boolean {
   return room.capacity >= attendees;
@@ -14,9 +16,7 @@ function filterByEquipment(room: Room, required: string[]): boolean {
 }
 
 function filterByFloor(room: Room, floor: number | null): boolean {
-  if (floor === null) {
-    return true;
-  }
+  if (floor === null) return true;
   return room.floor === floor;
 }
 
@@ -83,68 +83,35 @@ export function AvailableRoomList({ rooms, reservations, filters, onBook, isBook
   };
 
   return (
-    <div
-      css={css`
-        padding: 0 24px;
-      `}
-    >
-      <div
-        css={css`
-          display: flex;
-          align-items: baseline;
-          gap: 6px;
-        `}
-      >
+    <Section>
+      <SectionHeader>
         <Text typography="t5" fontWeight="bold" color={colors.grey900}>
           예약 가능 회의실
         </Text>
         <Text typography="t7" fontWeight="medium" color={colors.grey500}>
           {availableRooms.length}개
         </Text>
-      </div>
+      </SectionHeader>
       <Spacing size={16} />
 
       {availableRooms.length === 0 ? (
-        <div
-          css={css`
-            padding: 40px 0;
-            text-align: center;
-            background: ${colors.grey50};
-            border-radius: 14px;
-          `}
-        >
+        <EmptyState>
           <Text typography="t6" color={colors.grey500}>
             조건에 맞는 회의실이 없습니다.
           </Text>
-        </div>
+        </EmptyState>
       ) : (
-        <div
-          css={css`
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-          `}
-        >
+        <ListContainer>
           {availableRooms.map(room => {
             const isSelected = selectedRoomId === room.id;
             return (
-              <div
+              <RoomCard
                 key={room.id}
                 onClick={() => setSelectedRoomId(room.id)}
                 role="button"
                 aria-pressed={isSelected}
                 aria-label={room.name}
-                css={css`
-                  cursor: pointer;
-                  padding: 14px 16px;
-                  border-radius: 14px;
-                  border: 2px solid ${isSelected ? colors.blue500 : colors.grey200};
-                  background: ${isSelected ? colors.blue50 : colors.white};
-                  transition: all 0.15s;
-                  &:hover {
-                    border-color: ${isSelected ? colors.blue500 : colors.grey300};
-                  }
-                `}
+                isSelected={isSelected}
               >
                 <ListRow
                   contents={
@@ -163,10 +130,10 @@ export function AvailableRoomList({ rooms, reservations, filters, onBook, isBook
                     ) : undefined
                   }
                 />
-              </div>
+              </RoomCard>
             );
           })}
-        </div>
+        </ListContainer>
       )}
 
       {errorMessage && (
@@ -182,6 +149,18 @@ export function AvailableRoomList({ rooms, reservations, filters, onBook, isBook
       <Button display="full" onClick={handleBook} disabled={isBooking}>
         {isBooking ? '예약 중...' : '확정'}
       </Button>
-    </div>
+    </Section>
   );
 }
+
+const RoomCard = styled.div<{ isSelected: boolean }>`
+  cursor: pointer;
+  padding: 14px 16px;
+  border-radius: 14px;
+  border: 2px solid ${({ isSelected }) => (isSelected ? colors.blue500 : colors.grey200)};
+  background: ${({ isSelected }) => (isSelected ? colors.blue50 : colors.white)};
+  transition: all 0.15s;
+  &:hover {
+    border-color: ${({ isSelected }) => (isSelected ? colors.blue500 : colors.grey300)};
+  }
+`;

@@ -1,4 +1,5 @@
 import { css } from '@emotion/react';
+import styled from '@emotion/styled';
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -7,7 +8,7 @@ import { colors } from '_tosslib/constants/colors';
 import { getRooms, getReservations, createReservation } from 'pages/remotes';
 import { EQUIPMENT_LABELS, ALL_EQUIPMENT, START_TIME_SLOTS, END_TIME_SLOTS } from 'pages/constants';
 import { formatDate } from 'pages/utils';
-import { inputStyle } from 'pages/styles';
+import { PageContainer, Section, FieldGroup, FieldRow, FieldColumn, headerPadding, inputStyle } from 'pages/styles';
 import { AvailableRoomList } from './AvailableRoomList';
 import { MessageBanner } from 'pages/components/MessageBanner';
 import axios from 'axios';
@@ -29,27 +30,14 @@ export function RoomBookingPage() {
   );
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  // URL 쿼리 파라미터 동기화
   useEffect(() => {
     const params: Record<string, string> = {};
-    if (date) {
-      params.date = date;
-    }
-    if (startTime) {
-      params.startTime = startTime;
-    }
-    if (endTime) {
-      params.endTime = endTime;
-    }
-    if (attendees > 1) {
-      params.attendees = String(attendees);
-    }
-    if (equipment.length > 0) {
-      params.equipment = equipment.join(',');
-    }
-    if (preferredFloor !== null) {
-      params.floor = String(preferredFloor);
-    }
+    if (date) params.date = date;
+    if (startTime) params.startTime = startTime;
+    if (endTime) params.endTime = endTime;
+    if (attendees > 1) params.attendees = String(attendees);
+    if (equipment.length > 0) params.equipment = equipment.join(',');
+    if (preferredFloor !== null) params.floor = String(preferredFloor);
     setSearchParams(params, { replace: true });
   }, [date, startTime, endTime, attendees, equipment, preferredFloor, setSearchParams]);
 
@@ -69,7 +57,6 @@ export function RoomBookingPage() {
     }
   );
 
-  // 검증
   const hasTimeInputs = startTime !== '' && endTime !== '';
   let validationError: string | null = null;
   if (hasTimeInputs) {
@@ -117,77 +104,30 @@ export function RoomBookingPage() {
   };
 
   return (
-    <div
-      css={css`
-        background: ${colors.white};
-        padding-bottom: 40px;
-      `}
-    >
-      <div
-        css={css`
-          padding: 12px 24px 0;
-        `}
-      >
-        <button
-          type="button"
-          onClick={() => navigate('/')}
-          aria-label="뒤로가기"
-          css={css`
-            background: none;
-            border: none;
-            padding: 0;
-            cursor: pointer;
-            font-size: 14px;
-            color: ${colors.grey600};
-            &:hover {
-              color: ${colors.grey900};
-            }
-          `}
-        >
+    <PageContainer>
+      <BackButtonArea>
+        <BackButton type="button" onClick={() => navigate('/')} aria-label="뒤로가기">
           ← 예약 현황으로
-        </button>
-      </div>
-      <Top.Top03
-        css={css`
-          padding-left: 24px;
-          padding-right: 24px;
-        `}
-      >
-        예약하기
-      </Top.Top03>
+        </BackButton>
+      </BackButtonArea>
+      <Top.Top03 css={headerPadding}>예약하기</Top.Top03>
 
       {errorMessage && (
-        <div
-          css={css`
-            padding: 0 24px;
-          `}
-        >
+        <Section>
           <Spacing size={12} />
           <MessageBanner type="error" message={errorMessage} />
-        </div>
+        </Section>
       )}
 
       <Spacing size={24} />
 
-      {/* 예약 조건 입력 */}
-      <div
-        css={css`
-          padding: 0 24px;
-        `}
-      >
+      <Section>
         <Text typography="t5" fontWeight="bold" color={colors.grey900}>
           예약 조건
         </Text>
         <Spacing size={16} />
 
-        {/* 날짜 */}
-        <div
-          css={css`
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-          `}
-        >
+        <FieldGroup>
           <Text as="label" typography="t7" fontWeight="medium" color={colors.grey600}>
             날짜
           </Text>
@@ -202,24 +142,11 @@ export function RoomBookingPage() {
             aria-label="날짜"
             css={inputStyle}
           />
-        </div>
+        </FieldGroup>
         <Spacing size={14} />
 
-        {/* 시간 */}
-        <div
-          css={css`
-            display: flex;
-            gap: 12px;
-          `}
-        >
-          <div
-            css={css`
-              display: flex;
-              flex-direction: column;
-              gap: 6px;
-              flex: 1;
-            `}
-          >
+        <FieldRow>
+          <FieldColumn>
             <Text as="label" typography="t7" fontWeight="medium" color={colors.grey600}>
               시작 시간
             </Text>
@@ -238,15 +165,8 @@ export function RoomBookingPage() {
                 </option>
               ))}
             </Select>
-          </div>
-          <div
-            css={css`
-              display: flex;
-              flex-direction: column;
-              gap: 6px;
-              flex: 1;
-            `}
-          >
+          </FieldColumn>
+          <FieldColumn>
             <Text as="label" typography="t7" fontWeight="medium" color={colors.grey600}>
               종료 시간
             </Text>
@@ -265,25 +185,12 @@ export function RoomBookingPage() {
                 </option>
               ))}
             </Select>
-          </div>
-        </div>
+          </FieldColumn>
+        </FieldRow>
         <Spacing size={14} />
 
-        {/* 참석 인원 + 선호 층 */}
-        <div
-          css={css`
-            display: flex;
-            gap: 12px;
-          `}
-        >
-          <div
-            css={css`
-              display: flex;
-              flex-direction: column;
-              gap: 6px;
-              flex: 1;
-            `}
-          >
+        <FieldRow>
+          <FieldColumn>
             <Text as="label" typography="t7" fontWeight="medium" color={colors.grey600}>
               참석 인원
             </Text>
@@ -298,15 +205,8 @@ export function RoomBookingPage() {
               aria-label="참석 인원"
               css={inputStyle}
             />
-          </div>
-          <div
-            css={css`
-              display: flex;
-              flex-direction: column;
-              gap: 6px;
-              flex: 1;
-            `}
-          >
+          </FieldColumn>
+          <FieldColumn>
             <Text as="label" typography="t7" fontWeight="medium" color={colors.grey600}>
               선호 층
             </Text>
@@ -326,27 +226,20 @@ export function RoomBookingPage() {
                 </option>
               ))}
             </Select>
-          </div>
-        </div>
+          </FieldColumn>
+        </FieldRow>
         <Spacing size={14} />
 
-        {/* 장비 */}
         <div>
           <Text as="label" typography="t7" fontWeight="medium" color={colors.grey600}>
             필요 장비
           </Text>
           <Spacing size={8} />
-          <div
-            css={css`
-              display: flex;
-              gap: 8px;
-              flex-wrap: wrap;
-            `}
-          >
+          <EquipmentList>
             {ALL_EQUIPMENT.map(eq => {
               const selected = equipment.includes(eq);
               return (
-                <button
+                <EquipmentChip
                   key={eq}
                   type="button"
                   onClick={() => {
@@ -356,35 +249,18 @@ export function RoomBookingPage() {
                   }}
                   aria-label={EQUIPMENT_LABELS[eq]}
                   aria-pressed={selected}
-                  css={css`
-                    padding: 8px 16px;
-                    border-radius: 20px;
-                    border: 1px solid ${selected ? colors.blue500 : colors.grey200};
-                    background: ${selected ? colors.blue50 : colors.grey50};
-                    color: ${selected ? colors.blue600 : colors.grey700};
-                    font-size: 14px;
-                    font-weight: 500;
-                    cursor: pointer;
-                    transition: all 0.15s;
-                    &:hover {
-                      border-color: ${selected ? colors.blue500 : colors.grey400};
-                    }
-                  `}
+                  isSelected={selected}
                 >
                   {EQUIPMENT_LABELS[eq]}
-                </button>
+                </EquipmentChip>
               );
             })}
-          </div>
+          </EquipmentList>
         </div>
-      </div>
+      </Section>
 
       {validationError && (
-        <div
-          css={css`
-            padding: 0 24px;
-          `}
-        >
+        <Section>
           <Spacing size={8} />
           <span
             css={css`
@@ -395,14 +271,13 @@ export function RoomBookingPage() {
           >
             {validationError}
           </span>
-        </div>
+        </Section>
       )}
 
       <Spacing size={24} />
       <Border size={8} />
       <Spacing size={24} />
 
-      {/* 예약 가능 회의실 목록 */}
       {isFilterComplete && (
         <AvailableRoomList
           rooms={rooms}
@@ -414,6 +289,43 @@ export function RoomBookingPage() {
       )}
 
       <Spacing size={24} />
-    </div>
+    </PageContainer>
   );
 }
+
+const BackButtonArea = styled.div`
+  padding: 12px 24px 0;
+`;
+
+const BackButton = styled.button`
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  font-size: 14px;
+  color: ${colors.grey600};
+  &:hover {
+    color: ${colors.grey900};
+  }
+`;
+
+const EquipmentList = styled.div`
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+`;
+
+const EquipmentChip = styled.button<{ isSelected: boolean }>`
+  padding: 8px 16px;
+  border-radius: 20px;
+  border: 1px solid ${({ isSelected }) => (isSelected ? colors.blue500 : colors.grey200)};
+  background: ${({ isSelected }) => (isSelected ? colors.blue50 : colors.grey50)};
+  color: ${({ isSelected }) => (isSelected ? colors.blue600 : colors.grey700)};
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s;
+  &:hover {
+    border-color: ${({ isSelected }) => (isSelected ? colors.blue500 : colors.grey400)};
+  }
+`;

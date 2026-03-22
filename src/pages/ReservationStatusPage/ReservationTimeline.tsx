@@ -1,9 +1,11 @@
 import { css } from '@emotion/react';
+import styled from '@emotion/styled';
 import { useMemo, useState } from 'react';
 import { Spacing, Text } from '_tosslib/components';
 import { colors } from '_tosslib/constants/colors';
 import { HOUR_LABELS, TIMELINE_START, TIMELINE_END } from 'pages/constants';
 import { formatEquipmentLabels } from 'pages/utils';
+import { Section } from 'pages/styles';
 import type { Room, Reservation } from 'pages/remotes';
 
 const TOTAL_MINUTES = (TIMELINE_END - TIMELINE_START) * 60;
@@ -32,44 +34,16 @@ export function ReservationTimeline({ rooms, reservations }: ReservationTimeline
   }, [reservations]);
 
   return (
-    <div
-      css={css`
-        padding: 0 24px;
-      `}
-    >
+    <Section>
       <Text typography="t5" fontWeight="bold" color={colors.grey900}>
         예약 현황
       </Text>
       <Spacing size={16} />
 
-      <div
-        css={css`
-          background: ${colors.grey50};
-          border-radius: 14px;
-          padding: 16px;
-        `}
-      >
-        <div
-          css={css`
-            display: flex;
-            align-items: flex-end;
-            margin-bottom: 8px;
-          `}
-        >
-          <div
-            css={css`
-              width: 80px;
-              flex-shrink: 0;
-              padding-right: 8px;
-            `}
-          />
-          <div
-            css={css`
-              flex: 1;
-              position: relative;
-              height: 18px;
-            `}
-          >
+      <TimelineContainer>
+        <TimelineHeader>
+          <RoomLabel />
+          <TimeAxis>
             {HOUR_LABELS.map(t => {
               const left = (timeToMinutes(t) / TOTAL_MINUTES) * 100;
               return (
@@ -90,28 +64,14 @@ export function ReservationTimeline({ rooms, reservations }: ReservationTimeline
                 </Text>
               );
             })}
-          </div>
-        </div>
+          </TimeAxis>
+        </TimelineHeader>
 
         {rooms.map((room, index) => {
           const roomReservations = reservationsByRoom.get(room.id) ?? [];
           return (
-            <div
-              key={room.id}
-              css={css`
-                display: flex;
-                align-items: center;
-                height: 32px;
-                ${index > 0 ? 'margin-top: 4px;' : ''}
-              `}
-            >
-              <div
-                css={css`
-                  width: 80px;
-                  flex-shrink: 0;
-                  padding-right: 8px;
-                `}
-              >
+            <TimelineRow key={room.id} isFirst={index === 0}>
+              <RoomLabel>
                 <Text
                   typography="t7"
                   fontWeight="medium"
@@ -123,83 +83,112 @@ export function ReservationTimeline({ rooms, reservations }: ReservationTimeline
                 >
                   {room.name}
                 </Text>
-              </div>
-              <div
-                css={css`
-                  flex: 1;
-                  height: 24px;
-                  background: ${colors.white};
-                  border-radius: 6px;
-                  position: relative;
-                  overflow: visible;
-                `}
-              >
+              </RoomLabel>
+              <TimeBar>
                 {roomReservations.map(res => {
                   const left = (timeToMinutes(res.start) / TOTAL_MINUTES) * 100;
                   const width = ((timeToMinutes(res.end) - timeToMinutes(res.start)) / TOTAL_MINUTES) * 100;
                   const isActive = activeReservation === res.id;
                   return (
-                    <div
-                      key={res.id}
-                      css={css`
-                        position: absolute;
-                        left: ${left}%;
-                        width: ${width}%;
-                        height: 100%;
-                      `}
-                    >
-                      <div
+                    <ReservationBlock key={res.id} style={{ left: `${left}%`, width: `${width}%` }}>
+                      <ReservationBar
                         role="button"
                         aria-label={`${room.name} ${res.start}-${res.end} 예약 상세`}
                         onClick={() => setActiveReservation(isActive ? null : res.id)}
-                        css={css`
-                          width: 100%;
-                          height: 100%;
-                          background: ${colors.blue400};
-                          border-radius: 4px;
-                          opacity: ${isActive ? 1 : 0.75};
-                          cursor: pointer;
-                          transition: opacity 0.15s;
-                          &:hover {
-                            opacity: 1;
-                          }
-                        `}
+                        isActive={isActive}
                       />
                       {isActive && (
-                        <div
-                          role="tooltip"
-                          css={css`
-                            position: absolute;
-                            top: 100%;
-                            left: 50%;
-                            transform: translateX(-50%);
-                            margin-top: 6px;
-                            background: ${colors.grey900};
-                            color: ${colors.white};
-                            padding: 8px 12px;
-                            border-radius: 8px;
-                            font-size: 12px;
-                            white-space: nowrap;
-                            z-index: 10;
-                            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
-                            line-height: 1.6;
-                          `}
-                        >
+                        <Tooltip role="tooltip">
                           <div>
                             {res.start} ~ {res.end}
                           </div>
                           <div>{res.attendees}명</div>
                           {res.equipment.length > 0 && <div>{formatEquipmentLabels(res.equipment)}</div>}
-                        </div>
+                        </Tooltip>
                       )}
-                    </div>
+                    </ReservationBlock>
                   );
                 })}
-              </div>
-            </div>
+              </TimeBar>
+            </TimelineRow>
           );
         })}
-      </div>
-    </div>
+      </TimelineContainer>
+    </Section>
   );
 }
+
+const TimelineContainer = styled.div`
+  background: ${colors.grey50};
+  border-radius: 14px;
+  padding: 16px;
+`;
+
+const TimelineHeader = styled.div`
+  display: flex;
+  align-items: flex-end;
+  margin-bottom: 8px;
+`;
+
+const RoomLabel = styled.div`
+  width: 80px;
+  flex-shrink: 0;
+  padding-right: 8px;
+`;
+
+const TimeAxis = styled.div`
+  flex: 1;
+  position: relative;
+  height: 18px;
+`;
+
+const TimelineRow = styled.div<{ isFirst: boolean }>`
+  display: flex;
+  align-items: center;
+  height: 32px;
+  ${({ isFirst }) => !isFirst && 'margin-top: 4px;'}
+`;
+
+const TimeBar = styled.div`
+  flex: 1;
+  height: 24px;
+  background: ${colors.white};
+  border-radius: 6px;
+  position: relative;
+  overflow: visible;
+`;
+
+const ReservationBlock = styled.div`
+  position: absolute;
+  height: 100%;
+`;
+
+const ReservationBar = styled.div<{ isActive: boolean }>`
+  width: 100%;
+  height: 100%;
+  background: ${colors.blue400};
+  border-radius: 4px;
+  opacity: ${({ isActive }) => (isActive ? 1 : 0.75)};
+  cursor: pointer;
+  transition: opacity 0.15s;
+  &:hover {
+    opacity: 1;
+  }
+`;
+
+const Tooltip = styled.div`
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  margin-top: 6px;
+  background: ${colors.grey900};
+  color: ${colors.white};
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 12px;
+  white-space: nowrap;
+  z-index: 10;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+  line-height: 1.6;
+`;
