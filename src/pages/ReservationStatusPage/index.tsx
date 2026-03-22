@@ -2,7 +2,7 @@ import { css } from '@emotion/react';
 import { useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Top, Spacing, Border, Button } from '_tosslib/components';
+import { Top, Spacing, Border, Button, Text } from '_tosslib/components';
 import { colors } from '_tosslib/constants/colors';
 import { getRooms, getReservations, getMyReservations, cancelReservation } from 'pages/remotes';
 import { formatDate } from 'pages/utils';
@@ -92,6 +92,10 @@ export function ReservationStatusPage() {
           padding: 0 24px;
         `}
       >
+        <Text typography="t5" fontWeight="bold" color={colors.grey900}>
+          날짜 선택
+        </Text>
+        <Spacing size={16} />
         <div
           css={css`
             display: flex;

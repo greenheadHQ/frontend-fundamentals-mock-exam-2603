@@ -3,7 +3,6 @@ import { useEffect, useState } from 'react';
 import { Spacing, Button, Text, ListRow } from '_tosslib/components';
 import { colors } from '_tosslib/constants/colors';
 import type { Room, Reservation } from 'pages/remotes';
-import { EQUIPMENT_LABELS } from 'pages/constants';
 import { formatEquipmentLabels } from 'pages/utils';
 
 function filterByCapacity(room: Room, attendees: number): boolean {

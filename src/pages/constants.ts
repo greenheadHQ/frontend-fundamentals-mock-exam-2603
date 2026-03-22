@@ -7,8 +7,8 @@ export const EQUIPMENT_LABELS: Record<string, string> = {
 
 export const ALL_EQUIPMENT = Object.keys(EQUIPMENT_LABELS);
 
-const TIMELINE_START = 9;
-const TIMELINE_END = 20;
+export const TIMELINE_START = 9;
+export const TIMELINE_END = 20;
 
 export const TIME_SLOTS: string[] = [];
 for (let h = TIMELINE_START; h <= TIMELINE_END; h++) {

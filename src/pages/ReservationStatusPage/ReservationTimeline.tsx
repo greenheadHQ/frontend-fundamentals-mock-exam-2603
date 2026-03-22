@@ -2,11 +2,9 @@ import { css } from '@emotion/react';
 import { useState } from 'react';
 import { Spacing, Text } from '_tosslib/components';
 import { colors } from '_tosslib/constants/colors';
-import { EQUIPMENT_LABELS } from 'pages/constants';
+import { EQUIPMENT_LABELS, TIMELINE_START, TIMELINE_END } from 'pages/constants';
 import type { Room, Reservation } from 'pages/remotes';
 
-const TIMELINE_START = 9;
-const TIMELINE_END = 20;
 const TOTAL_MINUTES = (TIMELINE_END - TIMELINE_START) * 60;
 
 const HOUR_LABELS: string[] = [];
