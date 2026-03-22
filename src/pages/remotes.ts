@@ -1,33 +1,38 @@
 import { http } from 'pages/http';
+import type { Room, Reservation } from '_tosslib/server/types';
 
-export function getRooms() {
-  return http.get<{ id: string; name: string; floor: number; capacity: number; equipment: string[] }[]>('/api/rooms');
-}
+export type { Room, Reservation };
 
-export function getReservations(date: string) {
-  return http.get<{ id: string; roomId: string; date: string; start: string; end: string; attendees: number; equipment: string[] }[]>(
-    `/api/reservations?date=${date}`
-  );
-}
-
-export function createReservation(data: {
+export interface CreateReservationRequest {
   roomId: string;
   date: string;
   start: string;
   end: string;
   attendees: number;
   equipment: string[];
-}) {
-  return http.post<typeof data, { ok: boolean; reservation?: unknown; code?: string; message?: string }>(
-    '/api/reservations',
-    data
-  );
+}
+
+export interface CreateReservationResponse {
+  ok: boolean;
+  reservation?: Reservation;
+  code?: string;
+  message?: string;
+}
+
+export function getRooms() {
+  return http.get<Room[]>('/api/rooms');
+}
+
+export function getReservations(date: string) {
+  return http.get<Reservation[]>(`/api/reservations?date=${date}`);
+}
+
+export function createReservation(data: CreateReservationRequest) {
+  return http.post<CreateReservationRequest, CreateReservationResponse>('/api/reservations', data);
 }
 
 export function getMyReservations() {
-  return http.get<{ id: string; roomId: string; date: string; start: string; end: string; attendees: number; equipment: string[] }[]>(
-    '/api/my-reservations'
-  );
+  return http.get<Reservation[]>('/api/my-reservations');
 }
 
 export function cancelReservation(id: string) {
